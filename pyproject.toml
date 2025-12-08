@@ -1,0 +1,17 @@
+[project]
+name = "gemma-agent-testing"
+version = "0.1.0"
+description = "Trying to build an AI coding agent on Gemma 3 27B"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+  "google-genai>=1.53.0",
+  "pyright>=1.1.407",
+  "pytest>=9.0.2",
+  "python-dotenv>=1.2.1",
+  "ruff>=0.14.8",
+  "ty>=0.0.1a32",
+]
+
+[tool.ty.environment]
+root = [".", "calculator"]
