@@ -19,8 +19,10 @@ function_map: dict[str, Callable[..., Any]] = {
 
 
 def call_function(
-    function_name: str, parameters: dict[str, Any], verbose: bool = False
-):
+    function_name: str,
+    parameters: dict[str, Any],
+    verbose: bool = False,
+) -> Any:
     """
     Execute a function by name with given parameters.
 

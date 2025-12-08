@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+from typing import Any, Optional
 
 from dotenv import load_dotenv
 from google import genai
@@ -11,7 +12,7 @@ from parse_response import process_model_response
 from prompts import available_functions, new_system_prompt
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="AI Code Assistant")
     parser.add_argument("user_prompt", type=str, help="Prompt to send to Gemini")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
@@ -34,27 +35,28 @@ def main():
     if args.verbose:
         print(f"User prompt: {args.user_prompt}\n")
 
-    iters = 0
-    while True:
-        iters += 1
-        if iters > MAX_ITERS:
-            print(f"Maximum iterations ({MAX_ITERS}) reached.")
-            sys.exit(1)
-
+    for _ in range(MAX_ITERS):
         try:
             final_response = generate_content(client, messages, args.verbose)
-            if final_response:
+            if final_response is not None:
                 print("Final response:")
                 print(final_response)
-                break
+                return
         except Exception as e:
-            print(f"Error in generate_content: {e}")
-            raise
+            print(f"Error in generate_content: {e}", file=sys.stderr)
+            sys.exit(1)
+
+    print(f"Maximum iterations ({MAX_ITERS}) reached", file=sys.stderr)
+    sys.exit(1)
 
 
-def generate_content(client: genai.Client, messages, verbose):
+def generate_content(
+    client: genai.Client,
+    messages: list[genai.types.Content],
+    verbose: bool,
+) -> Optional[str]:
     response = client.models.generate_content(model="gemma-3-27b-it", contents=messages)
-    if not response.text or not response.usage_metadata:
+    if response.text is None or response.usage_metadata is None:
         raise RuntimeError("Gemini API response appears to be malformed")
 
     if verbose:
@@ -62,6 +64,9 @@ def generate_content(client: genai.Client, messages, verbose):
         print("Response tokens:", response.usage_metadata.candidates_token_count)
 
     response_text = response.text.strip()
+    if not response_text:
+        raise RuntimeError("Gemini API returned an empty response")
+
     if verbose:
         print(f"\nModel response:\n{response_text}\n")
 
@@ -114,7 +119,7 @@ def generate_content(client: genai.Client, messages, verbose):
     if verbose:
         print(f"Executing {len(function_calls)} function call(s)")
 
-    function_results = []
+    function_results: list[dict[str, Any]] = []
     for func_call in function_calls:
         func_name = func_call["function"]
         func_params = func_call["parameters"]
@@ -132,7 +137,7 @@ def generate_content(client: genai.Client, messages, verbose):
             function_results.append({"name": func_name, "error": str(e)})
 
     if not function_results:
-        raise Exception("No function results generated; exiting.")
+        raise RuntimeError("No function results generated; exiting.")
 
     results_text = format_function_results(function_results)
     if verbose:
@@ -144,7 +149,7 @@ def generate_content(client: genai.Client, messages, verbose):
     return None  # Continue loop
 
 
-def format_function_results(function_results):
+def format_function_results(function_results: list[dict[str, Any]]) -> str:
     results_text = "Function execution results:\n\n"
     for result in function_results:
         if "error" in result:
