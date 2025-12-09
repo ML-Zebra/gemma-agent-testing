@@ -36,5 +36,5 @@ Most of what I added or changed is in the following modules:
 - [`call_function.py`](call_function.py): made function calling more manual
 - [`main.py`](main.py): switched to handling everything manually, since Gemma 3 allows neither tools nor system instructions
 - [`parse_response.py`](parse_response.py): entirely new module to parse LLM responses, detect function calls, etc.
-- [`prompts.py`](prompts.py): new, more verbose system prompt
+- [`prompts.py`](prompts.py): new, _much_ more verbose system prompt
 - [`test_parse_response.py`](test_parse_response.py): tests for the new response parser
