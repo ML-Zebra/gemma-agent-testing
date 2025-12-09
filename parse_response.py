@@ -1,6 +1,6 @@
 import ast
 import re
-from typing import Any, TypedDict
+from typing import Any, Optional, TypedDict
 
 from google import genai
 
@@ -64,18 +64,32 @@ def process_model_response(
 
 
 def contains_function_call(response: str) -> bool:
-    response = response.strip()
     # More detailed validation happens in extract_function_calls
-    return response.startswith("[")
+    return find_call_list_segment(response) is not None
+
+
+def find_call_list_segment(response: str) -> Optional[str]:
+    # Greedy-match the first [ ... ] block
+    match = re.search(r"\[[\s\S]+\]", response)
+    if not match:
+        return None
+
+    segment = match.group(0)
+
+    # Sanity check: does it contain something like "name("?
+    if not re.search(r"\w+\(", segment):
+        return None
+
+    return segment
 
 
 def extract_function_calls(response: str) -> list[str]:
-    # Extract content between outer brackets
-    match = re.match(r"^\s*\[(.*)\]\s*$", response.strip())
-    if not match:
+    segment = find_call_list_segment(response)
+    if not segment:
         return []
 
-    inner_content = match.group(1)
+    # Strip outer brackets
+    inner_content = segment.strip()[1:-1]
 
     # Split by "), " to handle multiple function calls
     # But be careful with nested structures

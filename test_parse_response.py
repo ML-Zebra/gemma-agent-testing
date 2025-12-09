@@ -224,8 +224,11 @@ def test_malformed_syntax():
     response = "[not_a_valid_call"
     result = process_model_response(response, schemas)
 
-    assert result["type"] == "error"
-    assert result["valid"] is False
+    # Previously this would have been detected as a malformed function call
+    # Now it's just interpreted as a text response
+
+    assert result["type"] == "text"
+    assert result["valid"] is True
 
 
 def test_empty_brackets():
@@ -233,9 +236,11 @@ def test_empty_brackets():
     response = "[]"
     result = process_model_response(response, schemas)
 
-    assert result["type"] == "error"
-    assert result["valid"] is False
-    assert "No valid function calls found" in result["errors"][0]
+    # Previously this would have been detected as an invalid empty function call
+    # Now it's just interpreted as a text response
+
+    assert result["type"] == "text"
+    assert result["valid"] is True
 
 
 def test_whitespace_handling():
