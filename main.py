@@ -9,7 +9,7 @@ from google import genai
 from call_function import call_function
 from config import MAX_ITERS
 from parse_response import process_model_response
-from prompts import available_functions, new_system_prompt
+from prompts import available_functions, system_prompt
 
 
 def main() -> None:
@@ -25,9 +25,7 @@ def main() -> None:
 
     client = genai.Client(api_key=api_key)
     messages = [
-        genai.types.Content(
-            role="user", parts=[genai.types.Part(text=new_system_prompt)]
-        ),
+        genai.types.Content(role="user", parts=[genai.types.Part(text=system_prompt)]),
         genai.types.Content(
             role="user", parts=[genai.types.Part(text=args.user_prompt)]
         ),
