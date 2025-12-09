@@ -104,7 +104,9 @@ def generate_content(
     if not parsed_response["valid"]:
         error_message = "Function call validation failed:\n"
         error_message += "\n".join(f"- {err}" for err in parsed_response["errors"])
-        error_message += "\n\nPlease correct the function calls."
+        error_message += "\n\nPlease fix the function call syntax."
+        error_message += "\nThey were likely malformed, check the FUNCTION CALL MODE "
+        error_message += "instructions from the first message and try again."
 
         if verbose:
             print(f"Sending validation errors to model:\n{error_message}\n")
