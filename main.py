@@ -35,13 +35,18 @@ def main() -> None:
         print(f"User prompt: {args.user_prompt}\n")
 
     for i in range(MAX_ITERS):
-        print(f"--- Iteration {i + 1} ---")
+        if args.verbose:
+            print(f"--- Iteration {i + 1} ---")
+
         try:
             final_response = generate_content(client, messages, args.verbose)
             if final_response is not None:
                 print("Final response:")
                 print(final_response)
                 return
+
+            # Add delay between iterations to try to avoid rate limits
+            # Delay increases by 2 seconds each iteration
             sleep(5 + i * 2)
         except Exception as e:
             print(f"Error in generate_content: {e}", file=sys.stderr)
@@ -105,8 +110,7 @@ def generate_content(
         error_message = "Function call validation failed:\n"
         error_message += "\n".join(f"- {err}" for err in parsed_response["errors"])
         error_message += "\n\nPlease fix the function call syntax."
-        error_message += "\nThey were likely malformed, check the FUNCTION CALL MODE "
-        error_message += "instructions from the first message and try again."
+        error_message += "\nCheck the FUNCTION CALL MODE instructions from the first message and try again."
 
         if verbose:
             print(f"Sending validation errors to model:\n{error_message}\n")
