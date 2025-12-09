@@ -109,7 +109,7 @@ When the user asks for help:
 
 You are called in a loop: after you output function calls, their results will be provided to you in the next turn. You should then decide what to do next (more function calls, or final chat).
 
-Most tasks should start by scanning the working directory (".") with your listing tool. Do NOT ask the user where the code is — use the listing tool to find it.
+Most tasks should start by scanning the working directory (".") with your listing tool. Do NOT ask the user where the code is; use the listing tool to find it.
 
 All paths you provide should be relative to the working directory. You do NOT need to include the working directory itself in any path argument.
 """
