@@ -5,7 +5,7 @@ from time import sleep
 from typing import Any, Optional
 
 from dotenv import load_dotenv
-from google import genai
+from llm_config import genai
 
 from call_function import call_function
 from config import MAX_ITERS

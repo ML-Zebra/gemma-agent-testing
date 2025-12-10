@@ -1,6 +1,6 @@
 import os
 
-from google import genai
+from llm_config import genai
 
 from config import MAX_CHARS
 

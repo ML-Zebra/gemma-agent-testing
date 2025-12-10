@@ -1,6 +1,6 @@
 import os
 
-from google import genai
+from llm_config import genai
 
 
 def get_files_info(working_directory, directory="."):

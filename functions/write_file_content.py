@@ -1,6 +1,6 @@
 import os
 
-from google import genai
+from llm_config import genai
 
 
 def write_file(working_directory, file_path, content):
