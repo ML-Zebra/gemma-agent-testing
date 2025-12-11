@@ -1,4 +1,4 @@
-from llm_config import genai
+from google import genai
 
 from parse_response import process_model_response
 

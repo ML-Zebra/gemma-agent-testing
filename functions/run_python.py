@@ -1,7 +1,7 @@
 import os
 import subprocess
 
-from llm_config import genai
+from google import genai
 
 
 def run_python_file(working_directory, file_path, args=None):

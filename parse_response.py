@@ -2,7 +2,7 @@ import ast
 import re
 from typing import Any, Optional, TypedDict
 
-from llm_config import genai
+from google import genai
 
 
 class ParsedFunctionCall(TypedDict):

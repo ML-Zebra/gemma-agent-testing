@@ -1,5 +1,5 @@
 import os
-from typing import Any, Callable, ClassVar, Optional, Protocol, cast
+from typing import Any, ClassVar, Protocol, cast, runtime_checkable
 from dotenv import load_dotenv
 
 
@@ -9,9 +9,38 @@ from lib.openrouter_genai import OpenRouterGenAIClient
 load_dotenv()
 
 
+@runtime_checkable
+class Content(Protocol):
+    role: str
+    parts: list[Any]
+
+
+@runtime_checkable
+class LLMClient(Protocol):
+    class ModelsAPI(Protocol):
+        def generate_content(
+            self,
+            model: str,
+            contents: list[Content] | Content | str,
+            temperature: float = 0.7,
+            max_tokens: int | None = None,
+            **kwargs,
+        ) -> Any: ...
+
+    models: ModelsAPI
+
+
+class LLMClientFactory(Protocol):
+    def __call__(self, api_key: str | None = None) -> LLMClient: ...
+
+
 class GenAIProtocol(Protocol):
     types: ClassVar[Any]
-    Client: Callable[[Optional[str]], Any]
+    Client: LLMClientFactory
+
+
+ClientType = LLMClient
+ContentType = Content
 
 
 # Determine which client to use
@@ -91,17 +120,19 @@ else:
         @staticmethod
         def Client(api_key=None):
             if client_class == LocalGenAIClient:
-                return LocalGenAIClient(api_key=api_key, base_url=base_url)
+                return cast(
+                    LLMClient, LocalGenAIClient(api_key=api_key, base_url=base_url)
+                )
             elif client_class == OpenRouterGenAIClient:
-                return OpenRouterGenAIClient(
-                    api_key=api_key or os.getenv("OPENROUTER_API_KEY")
+                return cast(
+                    LLMClient,
+                    OpenRouterGenAIClient(
+                        api_key=api_key or os.getenv("OPENROUTER_API_KEY")
+                    ),
                 )
             else:
                 raise RuntimeError("Unsupported client class")
 
     genai: GenAIProtocol = GenAIShim()
-
-ClientType = Any  # TODO: Replace `Any` with the actual client class
-ContentType = Any  # TODO: Replace `Any` with the actual content class
 
 __all__ = ["genai", "LLM_PROVIDER"]
