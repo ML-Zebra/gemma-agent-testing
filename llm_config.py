@@ -1,4 +1,5 @@
 import os
+from typing import Any, Callable, ClassVar, Optional, Protocol, cast
 from dotenv import load_dotenv
 
 
@@ -7,11 +8,16 @@ from lib.openrouter_genai import OpenRouterGenAIClient
 
 load_dotenv()
 
-LLM_PROVIDER = os.getenv("LLM_PROVIDER", "google").lower()
+
+class GenAIProtocol(Protocol):
+    types: ClassVar[Any]
+    Client: Callable[[Optional[str]], Any]
+
 
 # Determine which client to use
 client_class = None
 base_url = None
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "google").lower()
 
 if LLM_PROVIDER == "lmstudio":
     try:
@@ -71,14 +77,16 @@ if client_class is None:
     if not os.getenv("GEMINI_API_KEY"):
         print("[LLM Config] Warning: GEMINI_API_KEY not set in .env file")
 
-    import google.genai as genai
+    import google.genai as _google_genai
+
+    genai: GenAIProtocol = cast(GenAIProtocol, _google_genai)
 
     LLM_PROVIDER = "google"
 else:
     import google.genai as _google_genai
 
-    class genai:
-        types = _google_genai.types
+    class GenAIShim:
+        types: ClassVar[Any] = _google_genai.types
 
         @staticmethod
         def Client(api_key=None):
@@ -90,6 +98,8 @@ else:
                 )
             else:
                 raise RuntimeError("Unsupported client class")
+
+    genai: GenAIProtocol = GenAIShim()
 
 
 __all__ = ["genai", "LLM_PROVIDER"]

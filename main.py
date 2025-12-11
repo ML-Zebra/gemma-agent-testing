@@ -31,7 +31,7 @@ def main() -> None:
     else:
         api_key = None  # LM Studio and llama.cpp do not require API keys
 
-    client = genai.Client(api_key=api_key)
+    client = genai.Client(api_key=api_key)  # type: ignore[call-arg]
     messages = [
         genai.types.Content(role="user", parts=[genai.types.Part(text=system_prompt)]),
         genai.types.Content(
