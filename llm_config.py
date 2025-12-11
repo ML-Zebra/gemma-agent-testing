@@ -43,6 +43,28 @@ elif LLM_PROVIDER == "llamacpp":
 
     except ImportError:
         print("[LLM Config] Error: local_genai module not found. Falling back to Google API.")
+
+        import google.genai as genai
+        LLM_PROVIDER = "google"
+
+elif LLM_PROVIDER == "ollama":
+    try:
+        from lib.local_genai import LocalGenAIClient
+        import google.genai as google_genai
+
+        base_url = os.getenv("OLLAMA_URL", "http://localhost:11434/v1")
+        print(f"[LLM Config] Using Ollama at {base_url}")
+
+        class genai:
+            types = google_genai.types
+
+            @staticmethod
+            def Client(api_key=None):
+                return LocalGenAIClient(api_key=api_key, base_url=base_url)
+
+    except ImportError:
+        print("[LLM Config] Error: local_genai module not found. Falling back to Google API.")
+
         import google.genai as genai
         LLM_PROVIDER = "google"
 
@@ -75,6 +97,7 @@ else:
         print(f"[LLM Config] Warning: Unknown LLM_PROVIDER '{LLM_PROVIDER}'. Using Google Generative AI")
     else:
         print("[LLM Config] Using Google Generative AI")
+
     import google.genai as genai
 
     if not os.getenv("GEMINI_API_KEY"):
