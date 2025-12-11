@@ -7,13 +7,13 @@ class OpenRouterGenAIClient:
 
     def __init__(self, api_key: str | None = None):
         """Initialize client.
-        
+
         Args:
             api_key: OpenRouter API key
         """
         if api_key is None:
             api_key = os.getenv("OPENROUTER_API_KEY")
-        
+
         if not api_key:
             raise ValueError("OpenRouter API key is required")
 
@@ -21,7 +21,9 @@ class OpenRouterGenAIClient:
             base_url="https://openrouter.ai/api/v1",
             api_key=api_key,
         )
-        self._default_model = os.getenv("OPENROUTER_MODEL", "google/gemma-3-27b-it:free")
+        self._default_model = os.getenv(
+            "OPENROUTER_MODEL", "google/gemma-3-27b-it:free"
+        )
         self.models = self.ModelsAPI(self._client, self._default_model)
 
     class ModelsAPI:
@@ -54,7 +56,7 @@ class OpenRouterGenAIClient:
             messages = self._convert_contents_to_messages(contents)
 
             actual_model = self._default_model
-            
+
             params = {
                 "model": actual_model,
                 "messages": messages,
